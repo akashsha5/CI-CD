@@ -2,12 +2,18 @@ node{
    stage('SCM Checkout'){
      git 'https://github.com/akashsha5/my-app.git'
    }
-   stage('Compile-Package'){
+   stage('maven-buildstage'){
 
       def mvnHome =  tool name: 'maven3', type: 'maven'   
       sh "${mvnHome}/bin/mvn clean package"
 	  sh 'mv target/myweb*.war target/newapp.war'
    }
+    stage('SonarQube Analysis') {
+	        def mvnHome =  tool name: 'maven3', type: 'maven'
+	        withSonarQubeEnv('sonar') { 
+	          sh "${mvnHome}/bin/mvn sonar:sonar"
+	        }
+	    }	
    stage('Build Docker Imager'){
    sh 'docker build -t akashshak/myweb:0.0.2 .'
    }
